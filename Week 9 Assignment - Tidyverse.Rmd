@@ -1,0 +1,105 @@
+---
+title: "Vignette"
+author: "Yanyi Li"
+date: "2024-11-01"
+output: html_document
+---
+
+## Tidyverse
+
+### The tidyverse is a collection of R packages designed for data science. It provides a cohesive framework for data manipulation, visualization, and analysis. The core packages within the tidyverse include:
+
+#### 1. ggplot2: 
+For data visualization, allowing users to create complex graphics with a simple and consistent syntax.
+
+#### 2. dplyr: 
+For data manipulation, offering a set of verbs for data frame operations like filtering, summarizing, and joining.
+
+#### 3. tidyr: 
+For tidying data, helping to reshape and organize data sets for easier analysis.
+
+#### 4. readr: 
+For reading and writing data, facilitating the import and export of data from various formats.
+
+#### 5. purrr: 
+For functional programming, providing tools for working with lists and functions in a more efficient way.
+
+#### 6. tibble: 
+A modern take on data frames, providing a simpler and more user-friendly alternative.
+
+#### 7. stringr: 
+For string manipulation, making it easier to work with text data.
+
+#### 8. forcats: 
+For working with categorical data, allowing users to manage and reorder factor levels.
+
+#### We will demonstrate examples of using the Tidyverse library to clean data and create visualizations.
+
+We need to call the package.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+We can load data or utilize any built-in dataset. In this instance, I chose a dataset titled "Sales Data Analysis" from Kaggle. It comprises orders of electronic devices along with details about those orders.
+
+```{r}
+df <- read.csv("https://raw.githubusercontent.com/yli1048/yli1048/refs/heads/607/Sales%20Data.csv")
+head(df)
+```
+
+We can remove the first column, X, as it is unnecessary and the data frame already includes an index.
+
+```{r}
+order <- subset(df, select = -c(X))
+head(order)
+```
+
+Then We can convert dates, months, and hours into date format using the lubridate package, which is part of the Tidyverse.
+
+```{r warning=FALSE}
+order$Order.Date <- ymd_hms(order$Order.Date)
+head(order)
+```
+
+To view the monthly sales data, we can utilize the ggplot2 package.
+
+```{r}
+order %>%
+  group_by(Month) %>%
+  summarise(summedSales = sum(Sales)) %>%
+  ggplot(aes(x = Month, y = summedSales, fill = as.factor(Month))) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = "Total Sales by Month", y = "Total Sales", fill = "Month" )
+```
+
+To effectively analyze total sales categorized by city and by month, we can use a line plot.
+
+```{r message=FALSE}
+order %>%
+  group_by(City, Month) %>%
+  summarise(summedcity = sum(Sales)) %>%
+  ggplot(aes(x = Month, y = summedcity, colour = City)) +
+    geom_line(stat = "identity") +
+    geom_point() +
+    scale_x_continuous(breaks=seq(1,12,1)) +
+    labs(title = "Total Sales by City", y = "Total Sales", fill = "City" )
+```
+
+In order to effectively manage inventory levels, it is essential to assess the frequency of each item. By conducting a count of each item's occurrence, we can ensure that we maintain adequate stock and subsequently illustrate the findings through graphical representation. We can create a data frame with items sorted in descending order and plot the data frame.
+
+```{r}
+frequency <- aggregate(order$Quantity.Ordered, by = list(Item = order$Product), FUN = sum)
+frequency[order(frequency$x, decreasing = TRUE),]
+```
+
+We can now create a plot using the data from the above data frame.
+
+```{r}
+  ggplot(frequency, aes(x = reorder(Item, x), y = x, fill = as.factor(Item))) +
+    geom_bar(stat = "identity", position = "dodge") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), legend.position = "none") +
+  coord_flip()
+```
+
+The Tidyverse is an incredibly valuable collection of packages designed to enhance data manipulation and visualization. It includes several core packages that provide powerful tools for data analysis, making it easier to clean, transform, and graphically represent data. The examples provided here illustrate just a fraction of the extensive functionalities that Tidyverse offers, showcasing its versatility and usefulness in data science workflows.
