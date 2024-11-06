@@ -1,0 +1,61 @@
+---
+title: "Assignment_tidyverse"
+author: "Andreina A"
+date: "2024-11-02"
+output: html_document
+---
+
+Your task here is to Create an Example.  Using one or more TidyVerse packages, and any dataset from fivethirtyeight.com or Kaggle, create a programming sample “vignette” that demonstrates how to use one or more of the capabilities of the selected TidyVerse package with your selected dataset.(25 points)
+
+Later, you'll be asked to extend an existing vignette.  Using one of your classmate’s examples (as created above), you'll then extend his or her example with additional annotated code. (15 points)
+
+You should clone the provided repository.  Once you have code to submit, you should make a pull request on the shared repository.  You should also update the README.md file with your example.
+
+After you’ve created your vignette, please submit your GitHub handle name in the submission link provided below. This will let your instructor know that your work is ready to be peer-graded.
+
+You should complete your submission on the schedule stated in the course syllabus.
+
+```{r}
+library(tidyverse)
+```
+
+
+**The data I used for this assignment was from fivethirtyeight and it's on the alcohol consumption from different countries in 2010. To load the data I used read.csv, since the file is a csv in github. Read.csv is from the readr library which is also in the tidyverse package. The glimpse function is from the tibble library from tyverse, that is used to view the data set and get informaiton on the ammount of rows and columns. This data set has 193 rows and 5 columns.**
+
+
+Article: https://fivethirtyeight.com/features/dear-mona-followup-where-do-people-drink-the-most-beer-wine-and-spirits/
+
+Data: https://github.com/fivethirtyeight/data/tree/master/alcohol-consumption
+
+```{r}
+DF1<-read.csv('https://raw.githubusercontent.com/fivethirtyeight/data/refs/heads/master/alcohol-consumption/drinks.csv')
+glimpse(DF1)
+```
+
+**From the tidyr library in tidyverse, pivot_longer function can be used to reshape the data frame by collapsing four coulumns into two columns, resulting into a lengthen data frame.**
+
+```{r echo=FALSE}
+DF1<-data.frame(DF1%>%
+  pivot_longer(c(beer_servings, spirit_servings, wine_servings,total_litres_of_pure_alcohol), names_to = 'alcohol_type_of_serving', values_to = 'serving_amount'))
+head(DF1)
+```
+**drop_na is a function from tidyr that drops missing vaules and trues the values into floats.**
+
+```{r echo=FALSE}
+head(drop_na(DF1,serving_amount))
+```
+
+
+
+**ggplot function is also from tidyverse used to plot data sets, as well the filter function which I used to only display data for serving amount that are greater than or equal to 347.**
+
+```{r}
+DF1<-filter(DF1,serving_amount>=347)
+ggplot(DF1, aes(x=country, y=serving_amount, fill=alcohol_type_of_serving)) +
+  geom_col(position="dodge")
+```
+
+
+# Conclusion
+
+**Tidyverse is a package that is handy for manipulating and transforming data. I was able to use filter to transform the data, glimpse to view the data, read.csv to read the data from a csv file into a data frame, pivot_longer to reshape the data, ggplot to show a visual of the data I was exploring.**
