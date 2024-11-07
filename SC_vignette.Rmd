@@ -1,0 +1,83 @@
+---
+title: "Week 9 TidyVerse/GitHub Create Vignette"
+author: "Stephanie Chiang"
+output: html_document
+date: "2024-11-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dplyr)
+```
+
+### Objective:
+
+#### To demonstrate how to use the `rowwise()` function in the `tidyverse` `dplyr` package to apply multiple custom functions requiring contextual row information to a data frame.
+
+### Step 1:
+
+Import the following dataset from [FiveThirtyEight](https://github.com/fivethirtyeight/data/tree/master/unisex-names) that represents the male and female shares of popular unisex names in the US.
+
+```{r import, paged.print=TRUE}
+names <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/refs/heads/master/unisex-names/unisex_names_table.csv")
+
+print(head(names, 10))
+```
+
+### Step 2:
+
+Create a custom function to add a new column indicating if the share gap is male-favored (M) or female-favored (F).
+
+This function `set_MF()` will accept as its parameter a vector containing the `male_share` and the `female_share` of the "current" row. Use bracket notation and the index to access each value.
+
+It will return a relevant string or `NA`.
+
+```{r custom-func-1}
+set_MF <- function(vec) {
+  male <- vec[1]
+  female <- vec[2]
+
+  if (male == female) {
+    return(NA)
+  } else {
+    ifelse(male > female, "M", "F")
+  }
+}
+```
+
+
+Create a second custom function to convert the values in the `gap` column from a difference in proportion to a raw number of people (rounded).
+
+This function `get_num()` will also accept a vector for its parameter; this time for the `total` number of people for the row and the percentage `gap`. It will return the rounded product of the two values.
+
+```{r custom-func-2}
+get_num <- function(vec) {
+  total <- vec[1]
+  gap <- vec[2]
+  
+  return(round(total * gap))
+}
+```
+
+### Step 3:
+
+To apply the above custom functions, the data frame is first piped in to the `rowwise()` function below. Then via `mutate()`, each of the new/changed columns is set as equal to the function with vectors of the column names as the arguments.
+
+```{r mutate}
+new_names <- names |>
+  rowwise() |>
+  mutate(
+    favor = set_MF(c(male_share, female_share)),
+    gap = get_num(c(total, gap))
+)
+
+print(head(new_names, 10))
+```
+
+### Conclusion
+
+Per the `dplyr` documentation, `rowwise()` "allows you to compute on a data frame a row-at-a-time. This is most useful when a vectorised function doesn't exist."
+
+So when a custom function requires multiple values from the same row as input, and not just the current "cell" value, `rowwise()` can be used to apply one (or many) function(s) to a data frame easily.
