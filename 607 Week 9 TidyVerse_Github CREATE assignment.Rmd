@@ -95,3 +95,21 @@ google_data %>%
 ```
 
 ### Conclusion: The TidyVerse's Dplyr package is great at solving data manipulation challenages and for running statistical comparisons between groups of variable values.
+
+---------------------
+Edited by Chi Hang(Philip) Cheung
+### Adding another example of tidyverse to this dataset, using mean across and select:
+```{r}
+#Adding a mean column for the average of High and Low
+google_data_mean<- google_data %>% 
+  mutate(average=rowMeans(select(., High, Low), na.rm=TRUE))
+google_data_mean
+```
+### We can also apply a function across columns:
+
+```{r}
+google_data_divided<- google_data %>% 
+  mutate(across(c(Open:Adj.Close), ~./100))
+google_data_divided
+```
+
